@@ -55,6 +55,13 @@ function YaziProcess:start(config, paths, callbacks)
       NVIM_CWD = vim.uv.cwd(),
       YAZI_CONFIG_HOME = config.config_home,
     },
+    -- add this tricky `on_stdout` callback to keep the clipboard in sync
+    on_stdout = function()
+      local output = vim.fn.system("xclip -selection clipboard -o")
+      if output ~= nil and output ~= "" then
+        vim.fn.system("xclip -selection clipboard", output)
+      end
+    end,
     on_exit = function(_, code)
       self.ya_process:kill()
       local events = self.ya_process:wait(1000)

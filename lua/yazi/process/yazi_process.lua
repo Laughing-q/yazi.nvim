@@ -57,11 +57,11 @@ function YaziProcess:start(config, paths, callbacks)
     },
     -- add this tricky `on_stdout` callback to keep the clipboard in sync
     on_stdout = function()
-      local output = vim.fn.getreg("+")
-      -- local output = vim.fn.system("xclip -selection clipboard -o")
+      -- local output = vim.fn.getreg("+")
+      local output = vim.fn.system("xclip -selection clipboard -o")
       if output ~= nil and output ~= "" then
-        -- vim.fn.system("xclip -selection clipboard", output)
-        vim.fn.setreg("+", output)
+        vim.fn.system("xclip -selection clipboard", output)
+        -- vim.fn.setreg("+", output)
       end
     end,
     on_exit = function(_, code)

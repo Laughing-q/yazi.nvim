@@ -24,7 +24,7 @@ YaziProcess.__index = YaziProcess
 ---@param callbacks yazi.Callbacks
 ---@return YaziProcess, YaziActiveContext
 
-local output = nil
+local global_clipboard = nil
 function YaziProcess:start(config, paths, callbacks)
   os.remove(config.chosen_file_path)
 
@@ -62,13 +62,13 @@ function YaziProcess:start(config, paths, callbacks)
       local clipboard = vim.fn.getreg("+")
       -- local clipboard = vim.fn.system("xclip -selection clipboard -o")
       if clipboard and clipboard ~= "" then
-        output = clipboard
+        global_clipboard = clipboard
       end
     end,
     on_exit = function(_, code)
-      if output ~= nil and output ~= "" then
+      if global_clipboard ~= nil and global_clipboard ~= "" then
         -- vim.fn.system("xclip -selection clipboard", output)
-        vim.fn.setreg("+", output)
+        vim.fn.setreg("+", global_clipboard)
       end
       self.ya_process:kill()
       local events = self.ya_process:wait(1000)

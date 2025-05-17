@@ -264,6 +264,21 @@ function M.set_keymappings(yazi_buffer, config, context)
     end, { buffer = yazi_buffer })
   end
 
+  local function get_git_relative_path(command, file)
+      local result = vim.fn.system("git rev-parse --show-toplevel 2>/dev/null")
+      if vim.v.shell_error ~= 0 then return nil end
+      local git_root = string.gsub(result, "\n$", "")  -- remove the linefeed
+
+      assert(command ~= nil, "realpath command must be set")
+      local relative_path = vim.fn.system({
+        command,
+        file,
+        "--relative-to",
+        git_root,
+      })
+      return string.gsub(relative_path, "\n$", "")  -- remove the linefeed
+  end
+
   if config.keymaps.copy_relative_path_to_selected_files ~= false then
     vim.keymap.set(
       { "t" },
@@ -272,9 +287,14 @@ function M.set_keymappings(yazi_buffer, config, context)
         keybinding_helpers.select_current_file_and_close_yazi(config, {
           api = context.api,
           on_file_opened = function(chosen_file)
-            local relative_path = require("yazi.utils").relative_path(
+            -- local relative_path = require("yazi.utils").relative_path(
+            --   config.integrations.resolve_relative_path_application,
+            --   context.input_path.filename,
+            --   get_git_root_vimfn(),
+            --   chosen_file
+            -- )
+            local relative_path = get_git_relative_path(
               config.integrations.resolve_relative_path_application,
-              context.input_path.filename,
               chosen_file
             )
 
@@ -284,9 +304,14 @@ function M.set_keymappings(yazi_buffer, config, context)
             local relative_paths = {}
             for _, path in ipairs(chosen_files) do
               relative_paths[#relative_paths + 1] =
-                require("yazi.utils").relative_path(
+                -- require("yazi.utils").relative_path(
+                --   config.integrations.resolve_relative_path_application,
+                --   -- context.input_path.filename,
+                --   get_git_root_vimfn(),
+                --   path
+                -- )
+                get_git_relative_path(
                   config.integrations.resolve_relative_path_application,
-                  context.input_path.filename,
                   path
                 )
             end
